@@ -122,14 +122,12 @@ if var_x != var_y:
     st.write(f"**Correlação de Pearson (r):** {correlacao:.4f}")
     st.write(f"**Coeficiente de Determinação (R²):** {r2:.4f}")
     st.write(f"**Equação da Reta:** Ŷ = {b0:.4f} + {b1:.4f} * X")
-    st.warning("🚨 Alerta de Integridade Estatística: Correlação forte não implica causalidade! Um jogo vender bem no mundo não é 'causado' apenas por ele ter vendido bem em uma região específica.")
 
     # Gráfico de Dispersão com a Reta de Regressão
     fig3, ax3 = plt.subplots(figsize=(8, 4))
     ax3.scatter(x_dados, y_dados, alpha=0.5,
                 color='orange', label="Jogos (Dados Reais)")
 
-    # Desenhando a reta matemática na unha
     x_min, x_max = min(x_dados), max(x_dados)
     x_reta = [x_min, x_max]
     y_reta = [b0 + b1 * x for x in x_reta]
@@ -141,8 +139,7 @@ if var_x != var_y:
     ax3.legend()
     st.pyplot(fig3)
 
-    # Ferramenta de Predição Interativa
-    st.subheader("🔮 Predição Interativa")
+    st.subheader("Predição Interativa")
     valor_x = st.number_input(
         f"Digite um valor hipotético de vendas para {var_x} (em milhões):", value=1.0)
     previsao_y = b0 + b1 * valor_x
