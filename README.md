@@ -1,7 +1,7 @@
 *Laboratório Estatístico: Venda de Video-Games (VIDEO GAMES SALES)*
 
 Equipe:
-* Pedro Felipe - RA : 72650572
+* Pedro Felipe Silva Lima git add .- RA : 72650572
 
 *Sobre o Projeto*
 Este é um laboratório interativo desenvolvido para a disciplina de Matemática e Estatística para Computação. Utilizamos o dataset "Video Game Sales" (com mais de 16.000 registros) para analisar tendências globais de vendas de jogos e aplicar conceitos probabilísticos e descritivos.
