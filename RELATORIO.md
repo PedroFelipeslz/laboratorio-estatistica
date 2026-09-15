@@ -35,18 +35,18 @@ O núcleo estatístico (`minhastats.py`) foi desenvolvido do zero para evitar de
 ## 3. Explicação dos Módulos e Prints da Aplicação
 ### Módulo 2: Estatística Descritiva
 A interface permite ao usuário selecionar uma região de vendas. A aplicação calcula todas as medidas de tendência central e dispersão e plota o histograma, permitindo visualizar o formato da distribuição.
-`![Print Modulo 2](modulo2.1.png)`
-`![Print Modulo 2](modulo2.2.png)`
+![Print Modulo 2](prints/modulo2.1.png.png)
+![Print Modulo 2](prints/modulo2.2.png.png)
 
 ### Módulos 3 e 4: Probabilidade e Simulação
 Ao definir o tamanho e a quantidade das amostras, o laboratório aplica uma simulação de Monte Carlo. É possível observar o Teorema Central do Limite em ação: independentemente do formato original dos dados, a distribuição das médias amostrais se aproxima de uma curva Normal à medida que as amostras crescem.
-`![Print Modulo 3 e 4](modulo3e4.png)`
+![Print Modulo 3 e 4](prints/modulo3e4.png.png)
 
 ### Módulo 5: Correlação e Regressão Linear
 O usuário seleciona duas variáveis (ex: Vendas na América do Norte vs. Vendas Globais). O sistema gera o diagrama de dispersão, traça a reta de regressão calculada e fornece a equação da reta para prever vendas futuras, além de exibir o R².
-`![Print Modulo 5](modulo5.1.png)`
-`![Print Modulo 5](modulo5.2.png)`
-`![Print Modulo 5](modulo5.3.png)`
+![Print Modulo 5](prints/modulo5.1.png.png)
+![Print Modulo 5](prints/modulo5.2.png.png)
+![Print Modulo 5](prints/modulo5.3.png.png)
 
 ---
 
