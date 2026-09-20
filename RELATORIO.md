@@ -1,9 +1,9 @@
- 📄 Relatório de Descobertas — Laboratório Estatístico
+# 📄 Relatório de Descobertas — Laboratório Estatístico
 
 **Nome:** Pedro Felipe
 **Curso:** Ciência da Computação
 
-
+---
 
 ## 1. Dataset Escolhido e Justificativa
 **Dataset:** Video Game Sales (Vendas de Jogos de Videogame).
@@ -15,35 +15,37 @@
 O núcleo estatístico (`minhastats.py`) foi desenvolvido do zero para evitar dependências de bibliotecas de alto nível no cálculo das métricas. Abaixo estão as principais fórmulas matemáticas (em notação padrão) que foram traduzidas para o código Python:
 
 *   **Média Aritmética:** 
-    $\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i$
+    $\bar{x}=\frac{1}{n}\sum_{i=1}^{n}x_i$
 *   **Variância Amostral:** 
-    $s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2$
+    $s^2=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})^2$
 *   **Desvio Padrão Amostral:** 
-    $s = \sqrt{s^2}$
+    $s=\sqrt{s^2}$
 *   **Covariância Amostral:** 
-    $cov(X,Y) = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})$
+    $cov(X,Y)=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y})$
 *   **Coeficiente de Correlação de Pearson:** 
-    $r = \frac{cov(X,Y)}{s_x s_y}$
+    $r=\frac{cov(X,Y)}{s_x s_y}$
 *   **Regressão Linear Simples (Mínimos Quadrados):**
-    *   Coeficiente angular (inclinação): $b_1 = \frac{cov(X,Y)}{s^2_x}$
-    *   Intercepto: $b_0 = \bar{y} - b_1\bar{x}$
+    *   Coeficiente angular (inclinação): $b_1=\frac{cov(X,Y)}{s^2_x}$
+    *   Intercepto: $b_0=\bar{y}-b_1\bar{x}$
 
 **Validação (Testes):** Todas as funções foram validadas utilizando o *framework* `pytest`. Os resultados gerados pelas funções próprias foram comparados contra as funções nativas das bibliotecas `numpy` e `scipy` (ex: `np.var`, `np.corrcoef`). Foi utilizada a tolerância numérica da função `math.isclose()` do Python, e o núcleo próprio obteve 100% de aprovação nos testes automatizados.
 
 ---
 
 ## 3. Explicação dos Módulos e Prints da Aplicação
+
 ### Módulo 2: Estatística Descritiva
-A interface permite ao usuário selecionar uma região de vendas. A aplicação calcula todas as medidas de tendência central e dispersão e plota o histograma, permitindo visualizar o formato da distribuição.
+A interface permite ao usuário selecionar uma região de vendas. A aplicação calcula todas as medidas de tendência central e dispersão. O histograma gerado utiliza a regra de Sturges para a definição automática do número de classes. Adicionalmente, a interface exibe um boxplot destacando visualmente os outliers detectados pela regra do IQR, acompanhado de uma interpretação textual automática que compara a média e a mediana para determinar a assimetria da distribuição.
 ![Print Modulo 2](prints/modulo2.1.png.png)
 ![Print Modulo 2](prints/modulo2.2.png.png)
 
 ### Módulos 3 e 4: Probabilidade e Simulação
-Ao definir o tamanho e a quantidade das amostras, o laboratório aplica uma simulação de Monte Carlo. É possível observar o Teorema Central do Limite em ação: independentemente do formato original dos dados, a distribuição das médias amostrais se aproxima de uma curva Normal à medida que as amostras crescem.
-![Print Modulo 3 e 4](prints/modulo3e4.png.png)
+O laboratório aplica duas demonstrações probabilísticas fundamentais. A primeira consiste na simulação da Lei dos Grandes Números (LGN), evidenciando a convergência da frequência relativa em direção à probabilidade teórica conforme o aumento da amostra. A segunda aplica uma simulação de Monte Carlo para observar o Teorema Central do Limite em ação: independentemente do formato original e assimétrico dos dados de vendas, a distribuição das médias amostrais se aproxima de uma curva Normal à medida que as amostras crescem.
+![Print Modulo 3 e 4](prints/modulo3e4.1.png.png)
+![Print Modulo 3 e 4](prints/modulo3e4.2.png.png)
 
 ### Módulo 5: Correlação e Regressão Linear
-O usuário seleciona duas variáveis (ex: Vendas na América do Norte vs. Vendas Globais). O sistema gera o diagrama de dispersão, traça a reta de regressão calculada e fornece a equação da reta para prever vendas futuras, além de exibir o R².
+O usuário seleciona duas variáveis (ex: Vendas na América do Norte vs. Vendas Globais). O sistema gera o diagrama de dispersão, traça a reta de regressão calculada e fornece a equação da reta e o R². A ferramenta de predição interativa possui uma trava de segurança limitando as entradas numéricas ao intervalo exato dos dados observados, evitando assim a extrapolação matemática.
 ![Print Modulo 5](prints/modulo5.1.png.png)
 ![Print Modulo 5](prints/modulo5.2.png.png)
 ![Print Modulo 5](prints/modulo5.3.png.png)
