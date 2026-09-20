@@ -1,150 +1,139 @@
 import streamlit as st
 import pandas as pd
+import numpy as np 
 import matplotlib.pyplot as plt
-import minhastats
-
+import scipy.stats as stats
+import minhastats 
+import math
 
 st.set_page_config(page_title="Lab Estatístico - Games", layout="wide")
-st.title("Laboratório Estatístico: Video Game Sales")
-
+st.title("🎮 Laboratório Estatístico: Video Game Sales")
 
 @st.cache_data
 def carregar_dados():
-    # Lê o arquivo CSV lá daquela pastinha que criamos
     df = pd.read_csv("dataset/vgsales.csv")
-    # Limpa linhas vazias para não quebrar a nossa matemática
     df = df.dropna()
     return df
-
 
 df = carregar_dados()
 
 st.header("Módulo 0: Explorando os Dados Reais")
-st.write("Abaixo está uma amostra do nosso dataset de vendas de jogos (em milhões de unidades):")
-st.dataframe(df.head(10))
+st.dataframe(df.head())
 
+# --------------------------------------------------------
+# MÓDULO 2: ESTATÍSTICA DESCRITIVA 
+# --------------------------------------------------------
 st.header("Módulo 2: Estatística Descritiva")
 
-
 colunas_vendas = ["NA_Sales", "EU_Sales", "JP_Sales", "Global_Sales"]
-variavel_escolhida = st.selectbox(
-    "Escolha uma região para analisar as vendas:", colunas_vendas)
-
+variavel_escolhida = st.selectbox("Escolha uma região para analisar as vendas:", colunas_vendas)
 
 dados_lista = df[variavel_escolhida].tolist()
 
-st.subheader(
-    f"Medidas calculadas pela biblioteca própria (minhastats.py) para {variavel_escolhida}")
+m_media = minhastats.media(dados_lista)
+m_mediana = minhastats.mediana(dados_lista)
+m_dp = minhastats.desvio_padrao(dados_lista)
 
 col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric("Média", f"{minhastats.media(dados_lista):.2f}")
-    st.metric("Mediana", f"{minhastats.mediana(dados_lista):.2f}")
-
-with col2:
-    st.metric("Amplitude", f"{minhastats.amplitude(dados_lista):.2f}")
-    st.metric("Variância", f"{minhastats.variancia(dados_lista):.2f}")
-
-with col3:
-    st.metric("Desvio Padrão", f"{minhastats.desvio_padrao(dados_lista):.2f}")
-    st.metric("Coef. de Variação",
-              f"{minhastats.coeficiente_variacao(dados_lista):.2f}%")
+col1.metric("Média", f"{m_media:.2f}")
+col2.metric("Mediana", f"{m_mediana:.2f}")
+col3.metric("Desvio Padrão", f"{m_dp:.2f}")
 
 
-st.write("**Histograma de Frequência**")
-fig, ax = plt.subplots(figsize=(10, 4))
-ax.hist(dados_lista, bins=50, color='purple', edgecolor='black',
-        range=(0, 2))  # Limitado a 2 milhões para visualizar melhor
-ax.set_title(f"Distribuição de {variavel_escolhida}")
+if m_media > m_mediana + (0.5 * m_dp):
+    st.info("Interpretação: Assimetria à direita detectada. Valores altos (outliers) estão puxando a média para cima.")
+elif m_media < m_mediana - (0.5 * m_dp):
+    st.info("Interpretação: Assimetria à esquerda detectada. Valores baixos estão puxando a média para baixo.")
+else:
+    st.info("Interpretação: A distribuição é aproximadamente simétrica.")
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+
+n = len(dados_lista)
+k_sturges = int(1 + 3.322 * math.log10(n))
+ax1.hist(dados_lista, bins=k_sturges, color='purple', edgecolor='black')
+ax1.set_title(f"Histograma (Regra de Sturges: {k_sturges} classes)")
+
+
+q1, q2, q3 = minhastats.quartis(dados_lista)
+iqr = q3 - q1
+limite_superior = q3 + 1.5 * iqr
+ax2.boxplot(dados_lista, vert=False)
+ax2.axvline(limite_superior, color='red', linestyle='dotted', label='Limite IQR')
+ax2.set_title("Boxplot e Outliers")
+ax2.legend()
+
 st.pyplot(fig)
 
-st.header("Módulos 3 e 4: Monte Carlo e Teorema Central do Limite")
-st.write("Vamos simular a coleta de amostras aleatórias das vendas de jogos. Mesmo que a distribuição original não seja simétrica, a média dessas amostras deve formar uma Curva Normal (Sino) perfeita!")
+# --------------------------------------------------------
+# MÓDULOS 3 e 4: SIMULAÇÃO E DISTRIBUIÇÕES TEÓRICAS
+# --------------------------------------------------------
+st.header("Módulos 3 e 4: Lei dos Grandes Números e TCL")
 
+st.subheader("Lei dos Grandes Números (Moedas)")
+lancamentos = st.slider("Número de lançamentos", 10, 5000, 100)
+if st.button("Simular LGN"):
+    moedas = np.random.randint(0, 2, lancamentos)
+    frequencias = np.cumsum(moedas) / np.arange(1, lancamentos + 1)
+    
+    fig_lgn, ax_lgn = plt.subplots(figsize=(10, 3))
+    ax_lgn.plot(frequencias, color='purple')
+    ax_lgn.axhline(0.5, color='red', linestyle='--', label="Probabilidade Teórica (0.5)")
+    ax_lgn.set_xscale('log')
+    ax_lgn.set_title("Convergência da Frequência Relativa (Escala Log)")
+    ax_lgn.legend()
+    st.pyplot(fig_lgn)
 
-col_param1, col_param2 = st.columns(2)
-with col_param1:
-    tamanho_amostra = st.slider(
-        "Tamanho da Amostra (n)", min_value=10, max_value=500, value=30)
-with col_param2:
-    num_repeticoes = st.slider(
-        "Número de Repetições", min_value=100, max_value=5000, value=1000)
+st.subheader("Teorema Central do Limite (TCL)")
+tamanho_amostra = st.slider("Tamanho da Amostra (n)", 2, 100, 30)
+num_repeticoes = st.slider("Repetições", 100, 5000, 1000)
 
-if st.button("Rodar Simulação"):
-    import random
-    import numpy as np
-    import scipy.stats as stats
-
-    medias_amostrais = []
-
-    for _ in range(num_repeticoes):
-        amostra = random.choices(dados_lista, k=tamanho_amostra)
-        medias_amostrais.append(minhastats.media(amostra))
-
-    fig2, ax2 = plt.subplots(figsize=(10, 4))
-
-    ax2.hist(medias_amostrais, bins=40, density=True, alpha=0.6,
-             color='dodgerblue', edgecolor='black', label="Médias Amostrais")
-
+if st.button("Simular TCL"):
+    medias_amostrais = [minhastats.media(np.random.choice(dados_lista, tamanho_amostra)) for _ in range(num_repeticoes)]
+    
+    fig_tcl, ax_tcl = plt.subplots(figsize=(10, 4))
+    ax_tcl.hist(medias_amostrais, bins=40, density=True, color='dodgerblue', edgecolor='black')
+    
+    # Curva Teórica
     media_teorica = minhastats.media(medias_amostrais)
     dp_teorico = minhastats.desvio_padrao(medias_amostrais)
-    xmin, xmax = ax2.get_xlim()
-    eixo_x = np.linspace(xmin, xmax, 100)
-    curva_normal = stats.norm.pdf(eixo_x, media_teorica, dp_teorico)
+    x_eixo = np.linspace(min(medias_amostrais), max(medias_amostrais), 100)
+    ax_tcl.plot(x_eixo, stats.norm.pdf(x_eixo, media_teorica, dp_teorico), 'k', linewidth=2)
+    st.pyplot(fig_tcl)
 
-    ax2.plot(eixo_x, curva_normal, 'k', linewidth=2,
-             label="Curva Normal Teórica")
-    ax2.set_title(f"Distribuição das Médias - {variavel_escolhida}")
-    ax2.legend()
-    st.pyplot(fig2)
-
-st.header("Módulo 5: Regressão Linear e Predição")
-st.write("Será que as vendas de uma região servem para prever as vendas de outra?")
+# --------------------------------------------------------
+# MÓDULO 5: CORRELAÇÃO E REGRESSÃO LINEAR 
+# --------------------------------------------------------
+st.header("Módulo 5: Regressão Linear")
 
 col_x, col_y = st.columns(2)
 with col_x:
-    var_x = st.selectbox("Variável Independente (X):",
-                         colunas_vendas, index=0)  # Padrão: NA_Sales
+    var_x = st.selectbox("Eixo X:", colunas_vendas, index=0)
 with col_y:
-    var_y = st.selectbox("Variável Dependente (Y):",
-                         colunas_vendas, index=3)   # Padrão: Global_Sales
+    var_y = st.selectbox("Eixo Y:", colunas_vendas, index=3)
 
 if var_x != var_y:
-    # Pegando os dados das colunas escolhidas
     x_dados = df[var_x].tolist()
     y_dados = df[var_y].tolist()
-
-    # Cálculos matemáticos usando nossa biblioteca minhastats.py
+    
     correlacao = minhastats.correlacao_pearson(x_dados, y_dados)
     b0, b1, r2 = minhastats.regressao_linear(x_dados, y_dados)
+    
+    st.write(f"**Pearson (r):** {correlacao:.4f} | **R²:** {r2:.4f}")
+    st.write(f"**Equação:** Ŷ = {b0:.4f} + {b1:.4f} * X")
+    st.warning("Associação não implica causa! Cada unidade a mais de X está associada estatisticamente a mudanças em Y, mas outros fatores (como marketing) influenciam o sucesso.")
 
-    st.write(f"**Correlação de Pearson (r):** {correlacao:.4f}")
-    st.write(f"**Coeficiente de Determinação (R²):** {r2:.4f}")
-    st.write(f"**Equação da Reta:** Ŷ = {b0:.4f} + {b1:.4f} * X")
-
-    # Gráfico de Dispersão com a Reta de Regressão
     fig3, ax3 = plt.subplots(figsize=(8, 4))
-    ax3.scatter(x_dados, y_dados, alpha=0.5,
-                color='orange', label="Jogos (Dados Reais)")
-
-    x_min, x_max = min(x_dados), max(x_dados)
-    x_reta = [x_min, x_max]
+    ax3.scatter(x_dados, y_dados, alpha=0.5, color='orange')
+    x_reta = [min(x_dados), max(x_dados)]
     y_reta = [b0 + b1 * x for x in x_reta]
-    ax3.plot(x_reta, y_reta, color='red',
-             linewidth=2, label="Reta de Regressão")
-
-    ax3.set_xlabel(f"Vendas em {var_x}")
-    ax3.set_ylabel(f"Vendas em {var_y}")
-    ax3.legend()
+    ax3.plot(x_reta, y_reta, color='red', linewidth=2)
     st.pyplot(fig3)
 
-    st.subheader("Predição Interativa")
-    valor_x = st.number_input(
-        f"Digite um valor hipotético de vendas para {var_x} (em milhões):", value=1.0)
+    st.subheader("🔮 Predição (Respeitando os Limites Reais)")
+    min_x, max_x = min(x_dados), max(x_dados)
+    
+    valor_x = st.number_input(f"Digite um valor para {var_x} (entre {min_x:.2f} e {max_x:.2f}):", min_value=float(min_x), max_value=float(max_x), value=float(min_x))
+    
     previsao_y = b0 + b1 * valor_x
-    st.success(
-        f"O nosso modelo estatístico prevê que as vendas de {var_y} seriam de aproximadamente **{previsao_y:.2f} milhões**!")
-else:
-    st.error(
-        "Por favor, escolha variáveis diferentes para X e Y para calcular a correlação.")
+    st.success(f"Previsão de {var_y}: **{previsao_y:.2f} milhões**")
